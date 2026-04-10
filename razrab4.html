@@ -28,9 +28,13 @@
                 setNewName('');
             };
 
+            const deleteExperiment = (id) => {
+                setExperiments(prev => prev.filter(exp => exp.id !== id));
+            };
+
             return (
                 <div>
-                    <h1> Учёт экспериментов</h1>
+                    <h1>Учёт экспериментов</h1>
                     <div>
                         <input
                             type="text"
@@ -47,7 +51,10 @@
                     </div>
                     <ul>
                         {experiments.map(exp => (
-                            <li key={exp.id}>{exp.name} — {exp.status}</li>
+                            <li key={exp.id}>
+                                {exp.name} — {exp.status}
+                                <button onClick={() => deleteExperiment(exp.id)}>-</button>
+                            </li>
                         ))}
                     </ul>
                 </div>
