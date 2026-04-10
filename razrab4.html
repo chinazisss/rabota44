@@ -7,13 +7,208 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .app {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 28px 32px;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        .add-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .add-section input {
+            flex: 2;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.15s;
+            background: #fafbfc;
+        }
+        .add-section input:focus {
+            border-color: #3b82f6;
+            background: white;
+        }
+        .add-section select {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px;
+            background: #fafbfc;
+            outline: none;
+        }
+        .add-section button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            box-shadow: 0 4px 8px rgba(59,130,246,0.2);
+        }
+        .add-section button:hover {
+            background: #2563eb;
+        }
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-btn.active {
+            background: #1e293b;
+            color: white;
+        }
+        .stats {
+            background: #f8fafc;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 15px;
+            color: #0f172a;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+        }
+        .experiments-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .experiment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid #edf2f7;
+            border-radius: 18px;
+            padding: 16px 20px;
+            transition: box-shadow 0.15s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .experiment-item:hover {
+            box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+            border-color: #dce5ec;
+        }
+        .exp-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .exp-name {
+            font-weight: 600;
+            color: #0b1e33;
+            font-size: 17px;
+        }
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-plan { background: #e9eef4; color: #2c3e50; }
+        .status-progress { background: #fef3c7; color: #b45309; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .delete-btn {
+            background: none;
+            border: 1px solid #f1c2c2;
+            color: #b91c1c;
+            font-size: 20px;
+            cursor: pointer;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            background: #fff8f8;
+        }
+        .delete-btn:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #991b1b;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-style: italic;
+            background: #fafcff;
+            border-radius: 24px;
+            border: 1px dashed #cbd5e1;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
+        const STATUSES = {
+            PLAN: 'План',
+            IN_PROGRESS: 'В процессе',
+            COMPLETED: 'Завершён'
+        };
+
+        const STORAGE_KEY = 'experiments_tracker';
+
         function App() {
             const [experiments, setExperiments] = React.useState(() => {
-                const saved = localStorage.getItem('experiments_tracker');
+                const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
                     try {
                         return JSON.parse(saved);
@@ -23,9 +218,14 @@
                 }
                 return [];
             });
+
             const [newName, setNewName] = React.useState('');
-            const [newStatus, setNewStatus] = React.useState('План');
+            const [newStatus, setNewStatus] = React.useState(STATUSES.PLAN);
             const [filterStatus, setFilterStatus] = React.useState('Все');
+
+            React.useEffect(() => {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(experiments));
+            }, [experiments]);
 
             const addExperiment = () => {
                 const trimmed = newName.trim();
@@ -49,53 +249,94 @@
             }, [experiments, filterStatus]);
 
             const completedCount = React.useMemo(() => {
-                return experiments.filter(exp => exp.status === 'Завершён').length;
+                return experiments.filter(exp => exp.status === STATUSES.COMPLETED).length;
             }, [experiments]);
 
-            React.useEffect(() => {
-                localStorage.setItem('experiments_tracker', JSON.stringify(experiments));
-            }, [experiments]);
+            const getStatusClass = (status) => {
+                switch (status) {
+                    case STATUSES.PLAN: return 'status-plan';
+                    case STATUSES.IN_PROGRESS: return 'status-progress';
+                    case STATUSES.COMPLETED: return 'status-completed';
+                    default: return '';
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    addExperiment();
+                }
+            };
+
+            const filterOptions = ['Все', STATUSES.PLAN, STATUSES.IN_PROGRESS, STATUSES.COMPLETED];
 
             return (
-                <div>
+                <div className="app">
                     <h1> Учёт экспериментов</h1>
-                    <div>
+
+                    <div className="add-section">
                         <input
                             type="text"
                             placeholder="Название эксперимента"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
+                            onKeyPress={handleKeyPress}
                         />
                         <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                            <option value="План"> План</option>
-                            <option value="В процессе"> В процессе</option>
-                            <option value="Завершён"> Завершён</option>
+                            <option value={STATUSES.PLAN}> План</option>
+                            <option value={STATUSES.IN_PROGRESS}> В процессе</option>
+                            <option value={STATUSES.COMPLETED}> Завершён</option>
                         </select>
                         <button onClick={addExperiment}>+ Добавить</button>
                     </div>
-                    <div>
-                        {['Все', 'План', 'В процессе', 'Завершён'].map(status => (
-                            <button
-                                key={status}
-                                onClick={() => setFilterStatus(status)}
-                                style={{ fontWeight: filterStatus === status ? 'bold' : 'normal' }}
-                            >
-                                {status === 'Все' ? 'Все' : status}
-                            </button>
-                        ))}
+
+                    <div className="filter-bar">
+                        <div className="filter-buttons">
+                            {filterOptions.map(opt => (
+                                <button
+                                    key={opt}
+                                    className={`filter-btn ${filterStatus === opt ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus(opt)}
+                                >
+                                    {opt === 'Все' ? ' Все' : opt}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="stats">
+                             Завершено: {completedCount}
+                        </div>
                     </div>
-                    <div> Завершено: {completedCount}</div>
-                    <ul>
-                        {filteredExperiments.map(exp => (
-                            <li key={exp.id}>
-                                {exp.name} — {exp.status}
-                                <button onClick={() => deleteExperiment(exp.id)}>-</button>
-                            </li>
-                        ))}
-                    </ul>
+
+                    {filteredExperiments.length === 0 ? (
+                        <div className="empty-message">
+                            {experiments.length === 0 
+                                ? 'Список экспериментов пуст. Добавьте первый!' 
+                                : 'Нет экспериментов с выбранным статусом.'}
+                        </div>
+                    ) : (
+                        <ul className="experiments-list">
+                            {filteredExperiments.map(exp => (
+                                <li key={exp.id} className="experiment-item">
+                                    <div className="exp-info">
+                                        <span className="exp-name">{exp.name}</span>
+                                        <span className={`status-badge ${getStatusClass(exp.status)}`}>
+                                            {exp.status}
+                                        </span>
+                                    </div>
+                                    <button
+                                        className="delete-btn"
+                                        onClick={() => deleteExperiment(exp.id)}
+                                        title="Удалить"
+                                    >
+                                        -
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
