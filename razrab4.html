@@ -12,7 +12,17 @@
     <div id="root"></div>
     <script type="text/babel">
         function App() {
-            const [experiments, setExperiments] = React.useState([]);
+            const [experiments, setExperiments] = React.useState(() => {
+                const saved = localStorage.getItem('experiments_tracker');
+                if (saved) {
+                    try {
+                        return JSON.parse(saved);
+                    } catch (e) {
+                        return [];
+                    }
+                }
+                return [];
+            });
             const [newName, setNewName] = React.useState('');
             const [newStatus, setNewStatus] = React.useState('План');
             const [filterStatus, setFilterStatus] = React.useState('Все');
@@ -42,6 +52,10 @@
                 return experiments.filter(exp => exp.status === 'Завершён').length;
             }, [experiments]);
 
+            React.useEffect(() => {
+                localStorage.setItem('experiments_tracker', JSON.stringify(experiments));
+            }, [experiments]);
+
             return (
                 <div>
                     <h1> Учёт экспериментов</h1>
@@ -66,7 +80,7 @@
                                 onClick={() => setFilterStatus(status)}
                                 style={{ fontWeight: filterStatus === status ? 'bold' : 'normal' }}
                             >
-                                {status === 'Все' ? ' Все' : status}
+                                {status === 'Все' ? 'Все' : status}
                             </button>
                         ))}
                     </div>
@@ -75,7 +89,7 @@
                         {filteredExperiments.map(exp => (
                             <li key={exp.id}>
                                 {exp.name} — {exp.status}
-                                <button onClick={() => deleteExperiment(exp.id)}>🗑-</button>
+                                <button onClick={() => deleteExperiment(exp.id)}>-</button>
                             </li>
                         ))}
                     </ul>
