@@ -15,6 +15,7 @@
             const [experiments, setExperiments] = React.useState([]);
             const [newName, setNewName] = React.useState('');
             const [newStatus, setNewStatus] = React.useState('План');
+            const [filterStatus, setFilterStatus] = React.useState('Все');
 
             const addExperiment = () => {
                 const trimmed = newName.trim();
@@ -32,9 +33,14 @@
                 setExperiments(prev => prev.filter(exp => exp.id !== id));
             };
 
+            const filteredExperiments = React.useMemo(() => {
+                if (filterStatus === 'Все') return experiments;
+                return experiments.filter(exp => exp.status === filterStatus);
+            }, [experiments, filterStatus]);
+
             return (
                 <div>
-                    <h1>Учёт экспериментов</h1>
+                    <h1> Учёт экспериментов</h1>
                     <div>
                         <input
                             type="text"
@@ -49,8 +55,19 @@
                         </select>
                         <button onClick={addExperiment}>+ Добавить</button>
                     </div>
+                    <div>
+                        {['Все', 'План', 'В процессе', 'Завершён'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setFilterStatus(status)}
+                                style={{ fontWeight: filterStatus === status ? 'bold' : 'normal' }}
+                            >
+                                {status === 'Все' ? ' Все' : status}
+                            </button>
+                        ))}
+                    </div>
                     <ul>
-                        {experiments.map(exp => (
+                        {filteredExperiments.map(exp => (
                             <li key={exp.id}>
                                 {exp.name} — {exp.status}
                                 <button onClick={() => deleteExperiment(exp.id)}>-</button>
