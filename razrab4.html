@@ -12,7 +12,46 @@
     <div id="root"></div>
     <script type="text/babel">
         function App() {
-            return <div>Приложение учёта экспериментов</div>;
+            const [experiments, setExperiments] = React.useState([]);
+            const [newName, setNewName] = React.useState('');
+            const [newStatus, setNewStatus] = React.useState('План');
+
+            const addExperiment = () => {
+                const trimmed = newName.trim();
+                if (!trimmed) return;
+                const newExp = {
+                    id: Date.now() + Math.random().toString(36),
+                    name: trimmed,
+                    status: newStatus
+                };
+                setExperiments(prev => [...prev, newExp]);
+                setNewName('');
+            };
+
+            return (
+                <div>
+                    <h1> Учёт экспериментов</h1>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Название эксперимента"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                        />
+                        <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+                            <option value="План"> План</option>
+                            <option value="В процессе"> В процессе</option>
+                            <option value="Завершён"> Завершён</option>
+                        </select>
+                        <button onClick={addExperiment}>+ Добавить</button>
+                    </div>
+                    <ul>
+                        {experiments.map(exp => (
+                            <li key={exp.id}>{exp.name} — {exp.status}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
         }
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
