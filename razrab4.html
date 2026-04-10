@@ -38,6 +38,10 @@
                 return experiments.filter(exp => exp.status === filterStatus);
             }, [experiments, filterStatus]);
 
+            const completedCount = React.useMemo(() => {
+                return experiments.filter(exp => exp.status === 'Завершён').length;
+            }, [experiments]);
+
             return (
                 <div>
                     <h1> Учёт экспериментов</h1>
@@ -66,11 +70,12 @@
                             </button>
                         ))}
                     </div>
+                    <div> Завершено: {completedCount}</div>
                     <ul>
                         {filteredExperiments.map(exp => (
                             <li key={exp.id}>
                                 {exp.name} — {exp.status}
-                                <button onClick={() => deleteExperiment(exp.id)}>-</button>
+                                <button onClick={() => deleteExperiment(exp.id)}>🗑-</button>
                             </li>
                         ))}
                     </ul>
